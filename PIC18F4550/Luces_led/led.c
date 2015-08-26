@@ -5,6 +5,7 @@
 /*       _____                                   ______,____,_______,      ,______
  SE REQUIEREN PARA TRABAJAR LA USB, LOS TRABAJAR DIRECTAMENTE
  */
+ // Importante revisar esta instrucción, el tiempo no coincide.
 #use  delay(clock=48000000)//se debe utilizar un cristal de 20Mhz
 #include <stdlib.h>
 #include <mth.h>
