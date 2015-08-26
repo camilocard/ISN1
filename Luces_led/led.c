@@ -1,4 +1,4 @@
-//este programa on led
+//este programa on led PIC18F4550
 
 #include <18F4550.h>
 #fuses   HSPLL,NOWDT,NOPROTECT,NOLVP,NODEBUG,PUT,USBDIV,PLL5,CPUDIV1,NOMCLR,VREGEN
