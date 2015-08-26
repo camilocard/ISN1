@@ -7,12 +7,17 @@
  */
 #use  delay(clock=48000000)//se debe utilizar un cristal de 20Mhz
 #include <stdlib.h>
-//#include <mth.h>
+#include <mth.h>
 //cargar librerias enviadas por el profesor
 /* b7 b6 b5 b4 b3 b2 b1 b0
   |  |  |  |  |  |  |  |  |
   */
-   
+  
+int   dato,suma
+long  clave[4]
+char  
+short 
+float 
 //gps bota una trama de 80 bytes
 //se pueden nombrar hasta 240 registros en la memoria ram, !comprobar
 //la memoria flash 32k en el pic18f4550
@@ -23,46 +28,38 @@ void secuencia()
 {
    for(;;)
    {
-      output_high(pin_A0);
-      delay_ms(40);
-      output_low(pin_A0);
-      delay_ms(40);
-      output_high(pin_A1);
-      delay_ms(40);
-      output_low(pin_A1);
-      delay_ms(40);
-      output_high(pin_A2);
-      delay_ms(40);
-      output_low(pin_A2);
-      delay_ms(40);
-      output_high(pin_A3);
-      delay_ms(40);
-      output_low(pin_A3);
-      delay_ms(40);
-      output_high(pin_A4);
-      delay_ms(40);
-      output_low(pin_A4);
-      delay_ms(40);// valores desde 1 hasta 65535
+      output_high(pin_B0);
+      delay_ms(1000);
+      output_low(pin_B0);
+      delay_ms(1000);// valores desde 1 hasta 65535
    }
 }
       
 void main()
 {
-   
-   //limpiar registros, probar limpiar todos los registros en assembler con =0
-   //ZERO_RAM();
    //configurar pines
    //puerto A 6 pines, a0 hasta a5, por defecto son salidas
    //puerto B 6
    //puerto D 8 pines
    //puerto E 3
    //33 pines de entrada(1) y salida(0)
-   set_tris_A(0x00);/* 0000 0000
-   RA0   led1       PIN   02
-   RA1   LED2       PIN   03
-   RA2   LED3       PIN   04
-   RA3   LED4       PIN   05
-   RA4   LED5       PIN   06
+   set_tris_A(0x35);/* 0011 0101
+   RA0   SW         PIN   02
+   RA1   ENTRADA1   PIN   03
+   RA2   
+   RA3
+   RA4
+   RA5
+   */
+   set_tris_B(0x00);/*0000 0000
+   RB0   LED1     PIN   02
+   RB1   LED2   PIN   03
+   RB2   LED3
+   RB3   LED4
+   RB4   LED5
+   RB5   LED6
+   RB6   LED7
+   RB7   LED8
    */
    
    //Habilitando y deshabilitando modulos...
@@ -76,12 +73,17 @@ void main()
    
    //limpie los puertos A y B
    OUTPUT_A(0x00);
+   OUTPUT_B(0x00);
    
-
-
-   secuencia();
+   //limpiar registros, probar limpiar todos los registros en assembler con =0
+   ZERO_RAM
    
-   //reset_cpu();//vuelva a inicio y vuelva y arranque
+   output_high(pin_B0);
+   delay_ms(1000);
+   output_low(pin_B0);
+   delay_ms(1000);// valores desde 1 hasta 65535
+   
+   reset_cpu();//vuelva a inicio y vuelva y arranque
    
    //otra opcion con metodos que se hacen antes del main
 }
