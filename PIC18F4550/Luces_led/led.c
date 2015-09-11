@@ -1,5 +1,10 @@
-//cambio explicacion Audrey
-//este programa on led PIC18F4550
+// Dispositivo: PIC 18F4550         Compilador:  CCS vs3.227
+   // Entorno IDE: PIC C Compiler      Simulador:   Ninguno
+   //
+   // Notas: Secuencias de led's
+   //
+   //
+//////////////////////////////////////////////////////////////////////////////////
 
 #include <18F4550.h>
 #fuses   HSPLL,NOWDT,NOPROTECT,NOLVP,NODEBUG,PUT,USBDIV,PLL5,CPUDIV1,NOMCLR,VREGEN
@@ -14,7 +19,11 @@
 #byte POSTINC0=0xfee
 #byte FSR0=0xfe9
 
-//programa principal
+//Definiendo el puerto que utiliza el pulsador
+#define  SW PIN_E3
+
+// variable contador
+int contador=0;
 
 void limpiarRegistros()
 {
@@ -25,6 +34,95 @@ void limpiarRegistros()
       btfss FSR0H,3  // ultimo_banco_ram  
       bra   next
    #endasm
+}
+
+void secuencia0()
+{
+   while(contador<8)
+   {
+      output_high(pin_A0);
+      delay_ms(25);
+      output_low(pin_A0);
+      delay_ms(25);
+      output_high(pin_A1);
+      delay_ms(25);
+      output_low(pin_A1);
+      delay_ms(25);
+      output_high(pin_A2);
+      delay_ms(25);
+      output_low(pin_A2);
+      delay_ms(25);
+      output_high(pin_A3);
+      delay_ms(25);
+      output_low(pin_A3);
+      delay_ms(25);
+      output_high(pin_A4);
+      delay_ms(25);
+      output_low(pin_A4);
+      delay_ms(25);
+      output_high(pin_A5);
+      delay_ms(25);
+      output_low(pin_A5);
+      delay_ms(25);
+      output_high(pin_B0);
+      delay_ms(25);
+      output_low(pin_B0);
+      delay_ms(25);
+      output_high(pin_B1);
+      delay_ms(25);
+      output_low(pin_B1);
+      delay_ms(25);
+      output_high(pin_B2);
+      delay_ms(25);
+      output_low(pin_B2);
+      delay_ms(25);
+      output_high(pin_B3);
+      delay_ms(25);
+      output_low(pin_B3);
+      delay_ms(25);
+      output_high(pin_B4);
+      delay_ms(25);
+      output_low(pin_B4);
+      delay_ms(25);
+      output_high(pin_B5);
+      delay_ms(25);
+      output_low(pin_B5);
+      delay_ms(25);
+      output_high(pin_B6);
+      delay_ms(25);
+      output_low(pin_B6);
+      delay_ms(25);
+      output_high(pin_B7);
+      delay_ms(25);
+      output_low(pin_B7);
+      delay_ms(25);
+      output_high(pin_C6);
+      delay_ms(25);
+      output_low(pin_C6);
+      delay_ms(25);
+      output_high(pin_C7);
+      delay_ms(25);
+      output_low(pin_C7);
+      delay_ms(25);
+      output_high(pin_D4);
+      delay_ms(25);
+      output_low(pin_D4);
+      delay_ms(25);
+      output_high(pin_D5);
+      delay_ms(25);
+      output_low(pin_D5);
+      delay_ms(25);
+      output_high(pin_D6);
+      delay_ms(25);
+      output_low(pin_D6);
+      delay_ms(25);
+      output_high(pin_D7);
+      delay_ms(25);
+      output_low(pin_D7);
+      delay_ms(25);
+
+      contador+=1;
+   }
 }
 
 void secuencia1()
@@ -129,38 +227,96 @@ void secuencia2()
 
    }
 }
-      
+
+void secuencia4()
+{
+   while(contador<8)
+   {
+      output_high(pin_A1);
+      delay_ms(25);
+      output_low(pin_A1);
+      delay_ms(25);
+      output_high(pin_A3);
+      delay_ms(25);
+      output_low(pin_A3);
+      delay_ms(25);
+      output_high(pin_A5);
+      delay_ms(25);
+      output_low(pin_A5);
+      delay_ms(25);
+      output_high(pin_B1);
+      delay_ms(25);
+      output_low(pin_B1);
+      delay_ms(25);
+      output_high(pin_B3);
+      delay_ms(25);
+      output_low(pin_B3);
+      delay_ms(25);
+      output_high(pin_B5);
+      delay_ms(25);
+      output_low(pin_B5);
+      delay_ms(25);
+      output_high(pin_B7);
+      delay_ms(25);
+      output_low(pin_B7);
+      delay_ms(25);
+      output_high(pin_C7);
+      delay_ms(25);
+      output_low(pin_C7);
+      delay_ms(25);
+      output_high(pin_D5);
+      delay_ms(25);
+      output_low(pin_D5);
+      delay_ms(25);
+      output_high(pin_D7);
+      delay_ms(25);
+      output_low(pin_D7);
+      delay_ms(25);
+
+      contador+=1;
+   }
+}
+
+//programa principal      
 void main()
 {
    set_tris_A(0x00);/* 0000 0000
-   RA0   LED1   PIN   02
-   RA1   LED2   PIN   03
-   RA2   LED3   PIN   04
-   RA3   LED4   PIN   05
-   RA4   LED5   PIN   06
-   RA5   LED6   PIN   07
+      RA0   LED1   PIN   02
+      RA1   LED2   PIN   03
+      RA2   LED3   PIN   04
+      RA3   LED4   PIN   05
+      RA4   LED5   PIN   06
+      RA5   LED6   PIN   07
    */
-   set_tris_B(0x00);/*0000 0000
-   RB0   LED7    PIN   40
-   RB1   LED8    PIN   39
-   RB2   LED9    PIN   38
-   RB3   LED10   PIN   37
-   RB4   LED11   PIN   36
-   RB5   LED12   PIN   35
-   RB6   LED13   PIN   34
-   RB7   LED14   PIN   33
+   set_tris_B(0x00);/* (0000 0000)
+      RB0   LED7    PIN   40
+      RB1   LED8    PIN   39
+      RB2   LED9    PIN   38
+      RB3   LED10   PIN   37
+      RB4   LED11   PIN   36
+      RB5   LED12   PIN   35
+      RB6   LED13   PIN   34
+      RB7   LED14   PIN   33
    */
 
    set_tris_C(0X00);/*
-   RC6   LED15   PIN   25
-   RC7   LED16   PIN   26
+      RC6   LED15   PIN   25
+      RC7   LED16   PIN   26
    */
 
    set_tris_D(0X00);/*
-   RD4   LED17   PIN   27
-   RD5   LED18   PIN   28
-   RD6   LED19   PIN   29
-   RD7   LED20   PIN   30
+      RD4   LED17   PIN   27
+      RD5   LED18   PIN   28
+      RD6   LED19   PIN   29
+      RD7   LED20   PIN   30
+   */
+
+   //Configuración para pulsador en puerto RE3
+   set_tris_E(0x01);/* bits(**** 0001)
+      RE0   LED17   PIN   08 -----> SW
+      RE1   LED18   PIN   09
+      RE2   LED19   PIN   10
+      RE3   LED20   PIN   01
    */
 
    //Habilitando y deshabilitando modulos...
@@ -182,7 +338,17 @@ void main()
    //#ZERO_RAM 
    limpiarRegistros();
 
-   secuencia2();
+   /*condicional para lanzar secuencia cuando
+     el pulsador esté presionado. */
+   if(!input (SW))
+   {
+      secuencia0();
+   }
+   else
+   {
+      secuencia4();
+   }
    
-   reset_cpu();//vuelva a inicio y vuelva y arranque
+   //vuelva a inicio y vuelva y arranque
+   reset_cpu();
 }
