@@ -2,7 +2,8 @@
    // Entorno IDE: PIC C Compiler      Simulador:   Ninguno
    //
    // Notas: Secuencias de led's
-   //
+   // Notación: Pin vacio (-----)
+   //           Pulsador  (SWn)
    //
 //////////////////////////////////////////////////////////////////////////////////
 
@@ -20,7 +21,8 @@
 #byte FSR0=0xfe9
 
 //Definiendo el puerto que utiliza el pulsador
-#define  SW PIN_E3
+#define  SW01 PIN_D0
+#define  SW02 PIN_D1
 
 // variable contador
 int contador=0;
@@ -38,6 +40,7 @@ void limpiarRegistros()
 
 void secuencia0()
 {
+   contador = 0;
    while(contador<8)
    {
       output_high(pin_A0);
@@ -127,22 +130,27 @@ void secuencia0()
 
 void secuencia1()
 {
-   for(;;)
+   contador = 0;
+   while(contador<2)
    {
       output_high(pin_B0);
-      delay_ms(1000);
+      delay_ms(500);
       output_low(pin_B0);
-      delay_ms(1000);// valores desde 1 hasta 65535
+      delay_ms(500);// valores desde 1 hasta 65535
       OUTPUT_A(0xFF);
-      delay_ms(1000);
+      delay_ms(500);
       OUTPUT_A(0x00);
-      delay_ms(1000);
+      delay_ms(500);
+
+      contador += 1;
    }
 }
 
 void secuencia2()
 {
-   for(;;)
+   contador = 0;
+
+   while(contador<2)
    {
       output_high(pin_A0);
       delay_ms(25);
@@ -225,12 +233,15 @@ void secuencia2()
       output_low(pin_D7);
       delay_ms(25);
 
+      contador +=1;
+
    }
 }
 
 void secuencia4()
 {
-   while(contador<8)
+   contador = 0;
+   while(contador<2)
    {
       output_high(pin_A1);
       delay_ms(25);
@@ -273,7 +284,7 @@ void secuencia4()
       output_low(pin_D7);
       delay_ms(25);
 
-      contador+=1;
+      contador += 1;
    }
 }
 
@@ -300,23 +311,32 @@ void main()
    */
 
    set_tris_C(0X00);/*
+      
+      RC0   -----   PIN   15
+      RC1   -----   PIN   16   
+      RC2   -----   PIN   17
       RC6   LED15   PIN   25
       RC7   LED16   PIN   26
    */
 
+   // Configuración de Leds 17 hasta 20 y Pulsadores 1 y 2   
    set_tris_D(0X00);/*
+      RD0   SW01    PIN   19 --->Pulsador 1
+      RD1   SW02    PIN   20 --->Pulsador 2
+      RD2   -----   PIN   21
+      RD3   -----   PIN   22
       RD4   LED17   PIN   27
       RD5   LED18   PIN   28
       RD6   LED19   PIN   29
       RD7   LED20   PIN   30
    */
 
-   //Configuración para pulsador en puerto RE3
-   set_tris_E(0x01);/* bits(**** 0001)
-      RE0   LED17   PIN   08 -----> SW
-      RE1   LED18   PIN   09
-      RE2   LED19   PIN   10
-      RE3   LED20   PIN   01
+   
+   set_tris_E(0x00);/* bits(**** 0000)
+      RE0   -----   PIN   08 
+      RE1   -----   PIN   09
+      RE2   -----   PIN   10
+      RE3   -----   PIN   01
    */
 
    //Habilitando y deshabilitando modulos...
@@ -340,15 +360,23 @@ void main()
 
    /*condicional para lanzar secuencia cuando
      el pulsador esté presionado. */
-   if(!input (SW))
+   output_float(SW01);
+   output_float(SW02);
+   while(TRUE)
    {
-      secuencia0();
+      if (input_state(SW01) == 1 && input_state(SW02) == 1)
+      {
+         secuencia1();
+      }else if (input_state(SW01) == 0 && input_state(SW02) == 1)
+      {
+         secuencia2();
+      }else if (input_state(SW01) == 1 && input_state(SW02) == 0)
+      {
+         secuencia4();
+      }else
+      {
+      }
    }
-   else
-   {
-      secuencia4();
-   }
-   
    //vuelva a inicio y vuelva y arranque
    reset_cpu();
 }
