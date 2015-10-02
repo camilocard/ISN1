@@ -2,13 +2,20 @@
    /////////////////////////////////////////////////////////////////////////////
    //                                                                         //
    //    Dispositivo: PIC 18F4550         Compilador:  CCS vs3.227            //
+
+         Autor: Mario Roberto Samudio
+         Coautores: Audrey Monsalve y Camilo Cardenas
+         
    //    Entorno IDE: PIC C Compiler      Simulador:   Ninguno                //
    //                                                                         //
    //    Notas: Contraseña con teclado matricial                              //
+   //           y respuesta con luces led                                     //
    //    Notación:   Pin vacio (-----)                                        //
    //                Pulsador  (SWn)                                          //
    //                                                                         //
    //    Teclado matricial <KBD18F.c> debe estar en la carpeta de drivers     //
+   //                                                                         //
+   //                                                                         // 
    //                                                                         //
    /////////////////////////////////////////////////////////////////////////////
       
@@ -26,23 +33,30 @@
 #use  delay(clock=4000000)//se debe utilizar un cristal de 4Mhz
 
 #include <stdlib.h>
-#include <KBD18F.c>        // Teclado matricial
-//#include <LCD4x20_3PIN.c>  // LCD
+#include <KBD18F.c>           // Teclado matricial
+//#include <LCD4x20_3PIN.c>   // LCD
 
 // Registros PIC18F4525
 #byte FSR0H=0xfea
 #byte POSTINC0=0xfee
 #byte FSR0=0xfe9
 
-//Definiendo el puerto que utiliza el pulsador
-#define  SW01 PIN_D0
-#define  SW02 PIN_D1
+/*Definiciones para: Pulsadores, leds de confirmación 
+   y 4 más  para cada digito de la clave.             */
+#define  SW01  PIN_D0
+#define  SW02  PIN_D1
+
+#define  LedRojo  pin_C7 // Led rojo que significa error
+#define  LedVerde  pin_C6 // Led verde que significa éxito
+
+#define  LED01 pin_D7
+#define  LED02 pin_D6
+#define  LED03 pin_D5
+#define  LED04 pin_D4
 
 // variables
-int   clave[4],datoe[4], b, i, contador=0;
-char  datom;
-long  auxsegundos, segundos;
-
+int   clave[4]={0,0,0,0}, i=0, j=0, k=0, contador=0;
+char  datom = '\0';
 
 // Limpiar todos los registros
 void limpiarRegistros()
@@ -55,92 +69,208 @@ void limpiarRegistros()
    #endasm
 }
 
-//Metodo que pide una contraseña
+//Método que pide una contraseña
 void teclado()
 {
-   auxsegundos=0;
-   segundos=0;
-   b=6;
-   //lcd_putc('\f'); // limpiar lcd
+   // ContraseÃ±a definida en: *8BC
+   //    clave[0] = 0x2a;// ===> *
+   //    clave[1] = 0x38;// ===> 8
+   //    clave[2] = 0x42;// ===> B
+   //    clave[3] = 0x43;// ===> C
 
-   for ( i = 0; i < 4; i++)
+   // Ciclo que determina el ingreso de solo 4 digitos.
+   for (i = 0; i < 4; i++)
    {
-      do{
-         datom=kbd_getc();
-         delay_ms(60);// si no oprimo una tecla este metodo me adiciona cualquier cosa despues de un tiempo
-         // no puede pasar de 6 segundos sino se sale del if im
-         if (datom!='\0')// si orpimió tecla?
-         {
-            switch(i+1)
+      // Condicionando el resultado de lectura para cada digito de la contraseña.
+      switch(i+1)
+      {
+         // Caso para el digito 1.
+         case 1:
+            // Ciclo ajustado en 6 veces a la espera, lectura y asignación del digito.
+            for (j = 0; j < 6; j++)
             {
-               case 1:
-                  clave[0]= datom-0x20; // quita el ascii
-                  swap(clave[0]);// Cambio de niveles
-                  //lcd_gotoxy(6,1);
-                  //printf(lcd_putc,"*");
-                  output_high(pin_D7);
-                  delay_ms(50);
-                  output_low(pin_D7);
-               break;
-
-               case 2:
-                  clave[1]= datom-0x30; // le quito el ascii
-                  clave[0]=clave[0]+clave[1];// El lcd tiene por defecto avanzar
-                  //printf(lcd_putc,"*");
-                  output_high(pin_D6);
-                  delay_ms(50);
-                  output_low(pin_D6);
-               break;
-
-               case 3:
-                  clave[2]= datom-0x40; // ñe quite el ascii
-                  swap(clave[2]);// Cambio de niveles
-                  //printf(lcd_putc,"*");
-                  output_high(pin_D5);
-                  delay_ms(50);
-                  output_low(pin_D5);
-               break;
-
-               case 4:
-                  clave[3]= datom-0x40; // le quito el ascii
-                  clave[2]=clave[2]+clave[3];// El lcd tiene por defecto avanzar
-                  //printf(lcd_putc,"*");
-                  output_high(pin_D4);
-                  delay_ms(50);
-                  output_low(pin_D4);
-               break;
+               // Ciclo ajustado para obtener 10 iteraciones en aproximación a 1 segundo.
+               for (k = 0; k < 100; k++)
+               {
+                  datom = kbd_getc();
+                  delay_ms(10);
+                  if (datom != '\0')
+                  {
+                     clave[i] = datom - 0x20; //quitando el ASCII clave[0] = 0x2a -0x20 = 0x0a
+                     j = 6;
+                     k = 100;
+                  }
+               }
             }
 
-            i++;
-            delay_ms(500);
-            auxsegundos=0;
-            segundos=0;
-         }
+            // Si no hay inserción del digito entonces se asigna un numeral.
+            if (datom == '\0')
+            {
+               output_high(LedRojo);
+               output_high(pin_D7);
+               delay_ms(2000);
+               clave[i] = '#';
+               output_low(LedRojo);
+            }else
+               output_high(pin_D7);
 
-         auxsegundos++;
-         
-         if (auxsegundos>20)
-         {
-            auxsegundos=0;
-            segundos++;
-         }
-      }while(segundos<6 && (i<4));
+         break;
 
-      clave[i]='#';
-      // lcd_gotoxy(b,1);
-      // printf(lcd_putc,"*");
-      b++;
+         // Para el caso del digito 2
+         case 2:
+            // Condicional que verifica si aún se mantiene presionada la tecla
+            while(datom == (clave[i-1] + 0x20))// poniendo el ASCII para comprobar
+            {
+               datom = kbd_getc();
 
-      //resetea los contadores para medir los segundos
-      auxsegundos=0;
-      segundos=0;
+               // Alerta roja si mantiene la tecla presionada demasiado tiempo
+               if (contador == 100)
+               {
+                  output_low(pin_D7);
+                  output_high(LedRojo); //
+                  contador = 0;   
+               }
+               contador++;
+            }
+
+            output_high(pin_D7);
+            output_low(LedRojo);
+            contador = 0;
+
+            for (j = 0; j < 6; j++)
+            {
+               for (k = 0; k < 100; k++)
+               {
+                  datom = kbd_getc();
+                  delay_ms(10);
+                  if (datom != '\0')
+                  {
+                     swap(clave[i-1]);// Cambio de niveles
+                     clave[i]= datom-0x30; // le quito el ascii
+                     clave[i-1] += clave[i];                  
+                     j = 6;
+                     k = 100;
+                  }
+               }
+            }
+
+            if (datom == '\0')
+            {
+               output_high(LedRojo);
+               output_high(pin_D6);
+               delay_ms(2000);
+               clave[i] = '#';
+               output_low(LedRojo);
+            }else
+               output_high(pin_D6);
+         break;
+
+         case 3:
+            while(datom == (clave[i-1] + 0x30))
+            {
+               datom = kbd_getc();
+               if (contador == 100)
+               {
+                  output_low(pin_D6);
+                  output_low(pin_D7);
+                  output_high(LedRojo);
+                  contador = 0;   
+               }
+
+               contador++;
+            }
+
+            output_high(pin_D6);
+            output_high(pin_D7);
+            output_low(LedRojo);
+            contador = 0;
+
+            for (j = 0; j < 6; j++)
+            {
+               for (k = 0; k < 100; k++)
+               {
+                  datom = kbd_getc();
+                  delay_ms(10);
+                  if (datom != '\0')
+                  {
+                     clave[i] = datom -0x40;
+                     j = 6;
+                     k = 100;
+                  }
+               }
+            }
+
+            if (datom == '\0')
+            {
+               output_high(LedRojo);
+               output_high(pin_D5);
+               delay_ms(2000);
+               clave[i] = '#';
+               output_low(LedRojo);
+            }else
+               output_high(pin_D5);
+         break;
+
+         case 4:
+            while(datom == (clave[i-1] + 0x40))
+            {
+               datom = kbd_getc();
+               if (contador == 100)
+               {
+                  output_low(pin_D7);
+                  output_low(pin_D6);
+                  output_low(pin_D5);
+                  output_high(LedRojo);
+                  contador = 0;   
+               }
+
+               contador++;
+            }
+
+            output_high(pin_D5);
+            output_high(pin_D6);
+            output_high(pin_D7);
+            output_low(LedRojo);
+            contador = 0;
+
+            for (j = 0; j < 6; j++)
+            {
+               for (k = 0; k < 100; k++)
+               {
+                  datom = kbd_getc();
+                  delay_ms(10);
+                  if (datom != '\0')
+                  {
+                     swap(clave[i-1]);
+                     clave[i] = datom -0x40;
+                     clave[i-1] += clave[i];
+                     j = 6;
+                     k = 100;
+                  }
+               }
+            }
+            if (datom == '\0')
+            {
+               output_high(LedRojo);
+               output_high(pin_D4);
+               delay_ms(2000);
+               clave[i] = '#';
+               output_low(LedRojo);
+            }else
+               output_high(pin_D4);
+         break;
+      }
    }
 }
-
 
 // Método principal
 void main()
 {
+   //limpiar registros, probar limpiar todos los registros en assembler con =0
+   //limpiarRegistros();
+   #zero_ram
+   
+   // Declaración de pines de puertos
    set_tris_A(0x00);/* (0000 0000)
       RA0   -----   PIN   02
       RA1   -----   PIN   03
@@ -151,7 +281,7 @@ void main()
    */
 
    // Configuración de pines para el teclado
-   set_tris_B(0x00);/* (0000 1111)
+   set_tris_B(0x0F);/* (0000 1111)
       RB0   COL0    PIN   40
       RB1   COL1    PIN   39
       RB2   COL2    PIN   38
@@ -204,43 +334,54 @@ void main()
    OUTPUT_C(0X00);
    OUTPUT_D(0X00);
 
-   //limpiar registros, probar limpiar todos los registros en assembler con =0
-   limpiarRegistros();
 
-   /*condicional para lanzar secuencia cuando
-     el pulsador esté presionado. */
-   output_float(SW01);
-   output_float(SW02);
+   //inicialización del teclado.
+   kbd_init();
 
-
-   //inicializando
-   while(contador <= 2)
-   {
-      output_high(pin_C6);
-      delay_ms(1000):
-      output_low(pin_C6);
-      delay_ms(1000);
-      contador += 1;
-   }
-
-   // Contraseña definida en: *8BC
-   //    clave[0] = 0x2a;// ===> *
-   //    clave[1] = 0x38;// ===> 8
-   //    clave[2] = 0x42;// ===> B
-   //    clave[3] = 0x43;// ===> C
-
+   // Llamando al método de inserción de contraseña.
    teclado();
-   if ((clave[0]== 0xa8) & (clave[2] == 0x23))  
+
+   // Evaluación de la contraseña guardada (*8BC) con la contraseña ingresada
+   if ((clave[0]== 0xA8) && (clave[2] == 0x23))  
    {
-       output_high(pin_C7);
-       delay_ms(2000);
-       output_low(pin_C7);
+      output_low(pin_D7);
+      output_low(pin_D6);
+      output_low(pin_D5);
+      output_low(pin_D4);
+
+      // Confirmación de exito en intervalo progresivo
+      for (i = 0; i < 100; ++i)
+      {
+         output_low(LedVerde);
+         delay_ms(i);
+         output_high(LedVerde);
+         delay_ms(i);
+      }
+
+      delay_ms(5000);
+      output_low(LedVerde);
    }else
    {
-      output_high(pin_C6);
-      delay_ms(2000);
-      output_low(pin_C6);
+      output_low(pin_D7);
+      output_low(pin_D6);
+      output_low(pin_D5);
+      output_low(pin_D4);
+
+      // Confirmación del error en intervalo igual
+      for (int i = 0; i < 3; ++i)
+      {
+         output_low(LedRojo);
+         delay_ms(500);
+         output_high(LedRojo);
+         delay_ms(500);
+      }
+
+      delay_ms(5000);
+      output_low(LedRojo);
    }
+
+   // Variable contraseña debe quedar vacia para un nuevo intento
+   clave=0;
 
    //vuelva a inicio y vuelva y arranque
    reset_cpu();
