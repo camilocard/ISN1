@@ -34,7 +34,12 @@
 
 #include <stdlib.h>
 #include <KBD18F.c>           // Teclado matricial
-//#include <LCD4x20_3PIN.c>   // LCD
+
+#define LCD_E     PIN_C2
+#define LCD_CK    PIN_D0   
+#define LCD_DAT   PIN_D1
+
+#include <LCD4x20_3PIN.c>   // LCD
 
 // Registros PIC18F4525
 #byte FSR0H=0xfea
@@ -296,16 +301,16 @@ void main()
       
       RC0   -----   PIN   15
       RC1   -----   PIN   16   
-      RC2   -----   PIN   17
+      RC2   LCD_E   PIN   17
       RC6   LED01   PIN   25
       RC7   LED02   PIN   26
    */
 
    set_tris_D(0x00);/* (0000 xx00)
-      RD0   SW01    PIN   19 --->Pulsador 1
-      RD1   SW02    PIN   20 --->Pulsador 2
-      RD2   -----   PIN   21
-      RD3   -----   PIN   22
+      RD0   LCD_DAT PIN   19 
+      RD1   LCD_CK  PIN   20
+      RD2   SW01    PIN   21
+      RD3   SW02    PIN   22
       RD4   LED03   PIN   27
       RD5   LED04   PIN   28
       RD6   LED05   PIN   29
@@ -338,6 +343,10 @@ void main()
    //inicialización del teclado.
    kbd_init();
 
+   //lcd init
+   lcd_init();
+   lcd_gotoxy(0,1);
+   lcd_putc("hola mundo");
    // Llamando al método de inserción de contraseña.
    teclado();
 
@@ -368,7 +377,7 @@ void main()
       output_low(pin_D4);
 
       // Confirmación del error en intervalo igual
-      for (int i = 0; i < 3; ++i)
+      for ( i = 0; i < 3; ++i)
       {
          output_low(LedRojo);
          delay_ms(500);

@@ -30,3 +30,5 @@
 
 # Debug files
 *.dSYM/
+/PIC18F4550/teclado-lcd/Principal.err
+/PIC18F4550/teclado-lcd/Principal.esym
